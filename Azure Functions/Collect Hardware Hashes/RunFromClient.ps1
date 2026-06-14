@@ -20,15 +20,14 @@ $ErrorActionPreference = 'Stop'
 
 try {
     $SerialNumber = (Get-CimInstance -ClassName Win32_BIOS).SerialNumber
-    $Hash = (Get-CimInstance -Namespace 'root/cimv2/mdm/dmmap' -Class MDM_DeviceDetail_Ext01 -Filter "InstanceID='Ext' AND ParentID='./DevDetail'")
+    $Hash = (Get-CimInstance -Namespace root/cimv2/mdm/dmmap -Class MDM_DevDetail_Ext01 -Filter "InstanceID='Ext' AND ParentID='./DevDetail'").DeviceHardwareData
     $Headers = New-object "System.Collections.Generic.Dictionary[[String],[String]]"
     $Headers.Add("Content-Type", "application/json")
 
-    $Body = @"
-{
-    `"DeviceSerial`" : `"$SerialNumber`",
-    `"HardwareHash`" : `"$Hash`"
-"@
+    $Body = @{
+        DeviceSerial = $SerialNumber
+        HardwareHash = $Hash
+    } | ConvertTo-Json
 
     $response = Invoke-RestMethod "Path/To/FunctionUrl" -Method POST -Headers $Headers -Body $Body
     $response | ConvertTo-Json
